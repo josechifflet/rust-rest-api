@@ -27,3 +27,5 @@ async-trait = "0.1.58"
 testcontainers = { version = "0.14.0" }
 log = "0.4"
 futures-util = "0.3.26"
+jwt = "0.16.0"
+tracing = "0.1.37"

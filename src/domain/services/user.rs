@@ -7,4 +7,3 @@ use crate::domain::models::user::{CreateUser, User};
 pub trait UserService: Sync + Send {
     async fn create(&self, user: CreateUser) -> Result<User, CommonError>;
 }
-

@@ -1,7 +1,10 @@
+use crate::domain::models::user::{CreateUser, UpdateUser, User};
+use crate::domain::repositories::repository::{
+    QueryParams, RepositoryResult, DEFAULT_LIMIT, DEFAULT_OFFSET,
+};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
-use crate::domain::repositories::repository::{QueryParams, RepositoryResult, DEFAULT_LIMIT, DEFAULT_OFFSET};
-use crate::domain::models::user::{User, CreateUser};
+use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct UserQueryParams {
@@ -22,4 +25,6 @@ impl QueryParams for UserQueryParams {
 #[async_trait]
 pub trait UserRepository: Send + Sync {
     async fn create(&self, new_user: &CreateUser) -> RepositoryResult<User>;
+    async fn update(&self, id: Uuid, user: &UpdateUser) -> RepositoryResult<User>;
+    async fn find_by_email(&self, email: &String) -> RepositoryResult<Option<User>>;
 }
