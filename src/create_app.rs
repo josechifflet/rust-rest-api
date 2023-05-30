@@ -1,3 +1,5 @@
+use std::env;
+
 use crate::api::controllers::authentication_handler::{login_handler, register_handler};
 use crate::api::controllers::todo_handler::{
     create_todo_handler, delete_todo_handler, get_todo_handler, list_todos_handler,
@@ -23,6 +25,11 @@ pub fn create_app() -> App<
     let todo_service = container.todo_service.clone();
     let authentication_service = container.authentication_service.clone();
     let service_context_service = container.service_context_service.clone();
+
+    env::set_var("RUST_BACKTRACE", "1");
+    env::set_var("RUST_LOG", "debug");
+    env::set_var("RUST_BACKTRACE", "1");
+    env_logger::try_init_from_env(env_logger::Env::new().default_filter_or("info"));
 
     App::new()
         .app_data(web::Data::from(todo_service.clone()))

@@ -13,7 +13,9 @@ pub fn hash(password: &[u8]) -> String {
 }
 
 #[tracing::instrument(name = "Verifying user password", skip(password, hash))]
-pub fn verify_password(hash: &str, password: &[u8]) -> Result<(), argon2::password_hash::Error> {
-    let parsed_hash = PasswordHash::new(hash)?;
-    Argon2::default().verify_password(password, &parsed_hash)
+pub fn verify_password(hash: &str, password: &[u8]) -> bool {
+    let parsed_hash = PasswordHash::new(hash).expect("Unable to parse hash.");
+    Argon2::default()
+        .verify_password(password, &parsed_hash)
+        .map_or(false, |_| true)
 }

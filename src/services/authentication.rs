@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use uuid::Uuid;
 
 use crate::domain::error::CommonError;
 use crate::domain::models::authentication::{
@@ -10,6 +11,7 @@ use crate::domain::models::user::CreateUser;
 use crate::domain::repositories::user::UserRepository;
 use crate::domain::services::authentication::AuthenticationService;
 use crate::utils::argon2::{hash, verify_password};
+use crate::utils::jwt;
 
 #[derive(Clone)]
 pub struct AuthenticationServiceImpl {
@@ -31,32 +33,34 @@ impl AuthenticationService for AuthenticationServiceImpl {
             .user_repository
             .find_by_email(&cloned.email)
             .await
-            .map_err(|e| -> CommonError { e.into() });
+            .map_err(|e| -> CommonError { e.into() })?;
 
-        match user_by_email {
-            Ok(user) => match user {
-                Some(user) => match verify_password(&user.password, cloned.password.as_bytes()) {
-                    Ok(_) => {
-                        let session_token = uuid::Uuid::new_v4();
-                        Ok(LogInSuccessful {
-                            user: user.into(),
-                            jwt: session_token.to_string(),
-                        })
-                    }
-                    Err(_) => {
-                        return Err(CommonError {
-                            message: "Invalid Credentials".to_string(),
-                            code: 401,
-                        })
-                    }
-                },
-                None => Err(CommonError {
-                    message: "Invalid Credentials".to_string(),
-                    code: 401,
-                }),
-            },
-            Err(e) => Err(e),
+        if user_by_email.is_none() {
+            return Err(CommonError {
+                message: "Invalid Credentials".to_string(),
+                code: 401,
+            });
         }
+
+        let user_by_email = user_by_email.unwrap();
+
+        let passwords_match = verify_password(&user_by_email.password, cloned.password.as_bytes());
+        if !passwords_match {
+            return Err(CommonError {
+                message: "Invalid Credentials".to_string(),
+                code: 401,
+            });
+        }
+
+        let jwtId = Uuid::new_v4();
+
+        let token = jwt::sign_jws(jwtId, user_by_email.id, 3600)
+            .map_err(|e| -> CommonError { e.into() })?;
+
+        Ok(LogInSuccessful {
+            jwt: token,
+            user: user_by_email,
+        })
     }
 
     async fn register(
