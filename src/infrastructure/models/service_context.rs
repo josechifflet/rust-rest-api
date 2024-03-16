@@ -1,7 +1,7 @@
 use diesel;
 use diesel::prelude::*;
 use crate::domain::models::service_context::ServiceContext;
-use crate::core::schema::service_contexts;
+use crate::infrastructure::schema::service_contexts;
 
 
 #[derive(Queryable, Insertable, AsChangeset)]

@@ -6,9 +6,9 @@ use diesel::prelude::*;
 use crate::domain::models::todo::{CreateTodo, Todo};
 use crate::domain::repositories::repository::{QueryParams, RepositoryResult, ResultPaging};
 use crate::domain::repositories::todo::{TodoQueryParams, TodoRepository};
-use crate::core::error::DieselRepositoryError;
-use crate::core::db::postgresql::DBConn;
-use crate::core::models::todo::{CreateTodoDiesel, TodoDiesel};
+use crate::infrastructure::error::DieselRepositoryError;
+use crate::infrastructure::databases::postgresql::DBConn;
+use crate::infrastructure::models::todo::{CreateTodoDiesel, TodoDiesel};
 
 pub struct TodoDieselRepository {
     pub pool: Arc<DBConn>
@@ -24,7 +24,7 @@ impl TodoDieselRepository {
 impl TodoRepository for TodoDieselRepository {
 
     async fn create(&self, new_todo: &CreateTodo) -> RepositoryResult<Todo> {
-        use crate::core::schema::todos::dsl::todos;
+        use crate::infrastructure::schema::todos::dsl::todos;
         let new_todo_diesel: CreateTodoDiesel = CreateTodoDiesel::from(new_todo.clone());
         let mut conn = self.pool.get().unwrap();
         let result: TodoDiesel = run(move || diesel::insert_into(todos).values(new_todo_diesel)
@@ -35,7 +35,7 @@ impl TodoRepository for TodoDieselRepository {
     }
 
     async fn list(&self, params: TodoQueryParams) -> RepositoryResult<ResultPaging<Todo>> {
-        use crate::core::schema::todos::dsl::todos;
+        use crate::infrastructure::schema::todos::dsl::todos;
         let pool = self.pool.clone();
         let builder = todos.limit(params.limit()).offset(params.offset());
         let result = run(move || {
@@ -51,7 +51,7 @@ impl TodoRepository for TodoDieselRepository {
     }
 
     async fn get(&self, todo_id: i32) -> RepositoryResult<Todo> {
-        use crate::core::schema::todos::dsl::{id, todos};
+        use crate::infrastructure::schema::todos::dsl::{id, todos};
         let mut conn = self.pool.get().unwrap();
         run(move || todos.filter(id.eq(todo_id)).first::<TodoDiesel>(&mut conn))
             .await
@@ -60,7 +60,7 @@ impl TodoRepository for TodoDieselRepository {
     }
 
     async fn delete(&self, todo_id: i32) -> RepositoryResult<()> {
-        use crate::core::schema::todos::dsl::{id, todos};
+        use crate::infrastructure::schema::todos::dsl::{id, todos};
         let mut conn = self.pool.get().unwrap();
         run(move || diesel::delete(todos).filter(id.eq(todo_id))
             .execute(&mut conn))

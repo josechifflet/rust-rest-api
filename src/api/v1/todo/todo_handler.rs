@@ -1,6 +1,6 @@
 use actix_web::{web, Result, HttpResponse};
-use crate::api::dto::todo::{CreateTodoDTO, TodoDTO};
-use crate::domain::error::{ApiError};
+use crate::api::v1::todo::todo_dto::{CreateTodoDTO, TodoDTO};
+use crate::domain::error::ApiError;
 use crate::domain::repositories::repository::ResultPaging;
 use crate::domain::repositories::todo::TodoQueryParams;
 use crate::domain::services::todo::TodoService;

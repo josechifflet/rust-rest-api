@@ -1,7 +1,7 @@
 use diesel;
 use diesel::prelude::*;
 use crate::domain::models::todo::{CreateTodo, Todo};
-use crate::core::schema::todos;
+use crate::infrastructure::schema::todos;
 
 #[derive(Queryable)]
 pub struct TodoDiesel {

@@ -43,6 +43,7 @@ install:
 	cargo add rand_core --features "std"
 	cargo add diesel --features "postgres r2d2 chrono"
 	cargo add anyhow
+	cargo add fern
 	cargo install cargo-watch
 	cargo install sqlx-cli
 	cargo install diesel_cli --no-default-features --features "postgres"

@@ -2,11 +2,11 @@ use std::sync::Arc;
 use diesel::{insert_into, update};
 use diesel::prelude::*;
 use diesel::result::Error;
-use log::{info};
+use log::info;
 use crate::domain::models::service_context::ServiceContext;
 use crate::domain::services::service_context::ServiceContextService;
-use crate::core::db::postgresql::DBConn;
-use crate::core::models::service_context::ServiceContextDiesel;
+use crate::infrastructure::databases::postgresql::DBConn;
+use crate::infrastructure::models::service_context::ServiceContextDiesel;
 
 #[derive(Clone)]
 pub struct ServiceContextServiceImpl {
@@ -21,7 +21,7 @@ impl ServiceContextServiceImpl {
     }
 
     fn get_service_context(&self) -> ServiceContext {
-        use crate::core::schema::service_contexts::dsl::{id, service_contexts};
+        use crate::infrastructure::schema::service_contexts::dsl::{id, service_contexts};
         let mut conn = self.pool.get().unwrap();
         let result: Result<ServiceContextDiesel, Error> = service_contexts.filter(id.eq(1)).first::<ServiceContextDiesel>(&mut conn);
 
@@ -34,7 +34,7 @@ impl ServiceContextServiceImpl {
     }
 
     fn create_service_context(&self) -> ServiceContext {
-        use crate::core::schema::service_contexts::dsl::service_contexts;
+        use crate::infrastructure::schema::service_contexts::dsl::service_contexts;
         let mut conn = self.pool.get().unwrap();
         let result: Result<ServiceContextDiesel, Error> = insert_into(service_contexts).values(ServiceContextDiesel { id: 1, maintenance: false }).get_result(&mut conn);
 
@@ -53,7 +53,7 @@ impl ServiceContextService for ServiceContextServiceImpl {
     fn update(&self, service_context: ServiceContext) -> ServiceContext {
         let service_context_diesel: ServiceContextDiesel = ServiceContextDiesel::from(service_context);
         let mut conn = self.pool.get().unwrap();
-        use crate::core::schema::service_contexts::dsl::{service_contexts, id};
+        use crate::infrastructure::schema::service_contexts::dsl::{service_contexts, id};
         let result: Result<ServiceContextDiesel, Error> = update(service_contexts)
             .filter(id.eq(1)).set(service_context_diesel).get_result(&mut conn);
 
